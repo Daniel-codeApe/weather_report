@@ -1,21 +1,32 @@
-import { NextResponse } from "next/server";
+// app/api/weather/route.ts
+import { NextRequest, NextResponse } from "next/server";
 
-export const GET = async () => {
-	const apiKey = "C3GVKTWHX6TM4L8EF72746G55";
-	const location = "Brisbane city";
-	const apiUrl = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${encodeURIComponent(
-		location
-	)}?unitGroup=uk&contentType=json&key=${apiKey}`;
-
+export async function POST(request: NextRequest) {
 	try {
-		const response = await fetch(apiUrl);
-		if (!response.ok) {
-			throw new Error(`Error: ${response.statusText}`);
+		const body = await request.json();
+		const { location, apiKey } = body;
+
+		if (!location || !apiKey) {
+			return NextResponse.json(
+				{ error: "Missing location or apiKey" },
+				{ status: 400 }
+			);
 		}
-		const data = await response.json();
+
+		// Build the external weather API URL
+		const apiUrl = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${encodeURIComponent(
+			location
+		)}?unitGroup=uk&contentType=json&key=${apiKey}`;
+
+		const res = await fetch(apiUrl, { method: "GET", headers: {} });
+		const data = await res.json();
+
 		return NextResponse.json(data);
-	} catch (error) {
-		console.error("Fetch Error:", error);
-		return NextResponse.json(error);
+	} catch (err: any) {
+		console.log(err);
+		return NextResponse.json(
+			{ error: err.message || "Something went wrong" },
+			{ status: err.statusCode || 500 }
+		);
 	}
-};
+}
