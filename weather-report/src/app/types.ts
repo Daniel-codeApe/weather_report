@@ -1,16 +1,16 @@
 export type WeatherResponse = {
-	queryCost: number;
-	latitude: number;
-	longitude: number;
-	resolvedAddress: string;
-	address: string;
-	timezone: string;
-	tzoffset: number;
-	description: string;
-	days: Day[];
-	alerts: any[]; // can expand if needed
-	stations: Record<string, Station>;
-	currentConditions: CurrentConditions;
+	queryCost?: number;
+	latitude?: number;
+	longitude?: number;
+	resolvedAddress?: string;
+	address?: string;
+	timezone?: string;
+	tzoffset?: number;
+	description?: string;
+	days?: Day[];
+	alerts?: any[]; // can expand if needed
+	stations?: Record<string, Station>;
+	currentConditions?: CurrentConditions;
 };
 
 export type Day = {
