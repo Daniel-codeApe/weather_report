@@ -12,6 +12,7 @@ export default function Home() {
     const apiKey = 'C3GVKTWHX6TM4L8EF72746G55'
     const [result, setResult] = useState<WeatherResponse>({})
     const [loading, setLoading] = useState(false)
+    const [openIndex, setOpenIndex] = useState<number | null>(0)
 
     async function fetchWeather() {
         setLoading(true) // show processing button
@@ -71,20 +72,31 @@ export default function Home() {
             </div>
 
             {result?.days ? (
-                <div className="p-6 rounded-lg bg-cover bg-center">
+                <div className="p-6 rounded-lg bg-cover bg-center flex justify-center">
                     <div className="w-full max-w-4xl gap-4 bg-white/70 p-4 rounded text-center">
-                        {result.days.map((day, index) => {
+                        {result.days?.map((day, index) => {
                             const theme = getTheme(day.conditions)
-                            if (index === 0) {
-                                // First card: full row
-                                return (
-                                    <div
-                                        key={index}
-                                        className={`col-span-2 rounded overflow-hidden shadow-lg bg-white/70 ${theme.text} mb-4`}
-                                        style={{
-                                            backgroundImage: `url(${theme.bg})`,
-                                        }}
-                                    >
+                            const isOpen = openIndex === index
+
+                            return (
+                                <div
+                                    key={index}
+                                    onClick={() =>
+                                        setOpenIndex(isOpen ? null : index)
+                                    } // toggle
+                                    className={`cursor-pointer rounded overflow-hidden shadow-lg mb-4 transition-all duration-300 ${
+                                        theme.text
+                                    } ${
+                                        isOpen
+                                            ? 'col-span-2 bg-white/70'
+                                            : 'bg-white/50'
+                                    }`}
+                                    style={{
+                                        backgroundImage: `url(${theme.bg})`,
+                                    }}
+                                >
+                                    {isOpen ? (
+                                        // Expanded Card (like first one)
                                         <div className="px-6 py-4">
                                             <p className="font-bold text-xl mb-2">
                                                 <strong>{day.datetime}</strong>
@@ -103,44 +115,35 @@ export default function Home() {
                                                     Feels like: {day.feelslike}
                                                     °C
                                                 </p>
-                                                <p>
-                                                    <LuSunrise className="inline mr-2 text-lg" />
-                                                    Sunrise: {day.sunrise}
-                                                    <span className="inline-block mx-8"></span>
-                                                    Sunset: {day.sunset}
-                                                    <LuSunset className="inline mr-2 text-lg" />
+                                                <p className="flex justify-center items-center gap-12">
+                                                    <span className="flex items-center">
+                                                        <LuSunrise className="inline mr-2 text-lg" />
+                                                        Sunrise: {day.sunrise}
+                                                    </span>
+                                                    <span className="flex items-center">
+                                                        <LuSunset className="inline mr-2 text-lg" />
+                                                        Sunset: {day.sunset}
+                                                    </span>
                                                 </p>
                                             </div>
                                         </div>
-                                    </div>
-                                )
-                            }
-
-                            // Other cards
-                            return (
-                                <div
-                                    key={index}
-                                    className={`flex justify-center rounded overflow-hidden shadow-lg bg-white/70 mb-2 ${theme.text}`}
-                                    style={{
-                                        backgroundImage: `url(${theme.bg})`,
-                                    }}
-                                >
-                                    <p className="font-bold text-lg">
-                                        {day.datetime}
-                                    </p>
-                                    <div
-                                        className={`${theme.text} text-center ml-4`}
-                                    >
-                                        <div className="flex justify-center">
-                                            <p className="text-2xl">
-                                                {theme.icon}
+                                    ) : (
+                                        // Collapsed Card (compact view)
+                                        <div className="px-6 py-4 flex justify-between items-center hover:opacity-20">
+                                            <p className="font-bold text-lg">
+                                                {day.datetime}
                                             </p>
-                                            <p className="ml-2 mt-0.5">
-                                                {day.tempmax}°C max{' '}
-                                                {day.tempmin}°C min
-                                            </p>
+                                            <div className="flex items-center">
+                                                <p className="text-2xl mr-2">
+                                                    {theme.icon}
+                                                </p>
+                                                <p>
+                                                    {day.tempmax}°C max /{' '}
+                                                    {day.tempmin}°C min
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
                             )
                         })}
