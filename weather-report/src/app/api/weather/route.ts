@@ -2,6 +2,31 @@
 import { NextRequest, NextResponse } from 'next/server'
 import redis from '../../../../lib/redis'
 
+async function fetchWithTimeout(url: string, timeout = 8000) {
+    const controller = new AbortController()
+    const id = setTimeout(() => controller.abort(), timeout)
+
+    try {
+        const res = await fetch(url, { signal: controller.signal })
+        if (!res.ok) throw new Error(`API error: ${res.status}`)
+        return await res.json()
+    } finally {
+        clearTimeout(id)
+    }
+}
+
+// ---- Retry wrapper ----
+async function fetchWithRetry(url: string, retries = 5, delay = 3000) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            return await fetchWithTimeout(url)
+        } catch (err) {
+            if (i === retries - 1) throw err
+            await new Promise((r) => setTimeout(r, delay * (i + 1))) // backoff
+        }
+    }
+}
+
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json()
@@ -28,8 +53,7 @@ export async function POST(request: NextRequest) {
             location
         )}?unitGroup=uk&contentType=json&key=${apiKey}`
 
-        const res = await fetch(apiUrl, { method: 'GET', headers: {} })
-        const data = await res.json()
+        const data = await fetchWithRetry(apiUrl)
 
         // Store in Redis for 1 hour (3600 seconds)
         await redis.set(cacheKey, JSON.stringify(data), 'EX', 3600)
