@@ -1,7 +1,8 @@
 # Next.js Weather App
 
 A simple **weather forecast app** built with **Next.js (App Router)**, **TypeScript**, and **Tailwind CSS**.  
-It fetches weather data from the [Visual Crossing Weather API](https://www.visualcrossing.com/weather-api) and caches results in **Redis** to reduce API calls and speed up responses.  
+It fetches weather data from the [Visual Crossing Weather API](https://www.visualcrossing.com/weather-api) and caches results in **Redis** to reduce API calls and speed up responses.
+Also gives random speeches in an old druid's tone.
 
 ## Features
 
